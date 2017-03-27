@@ -4,16 +4,43 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using System.Diagnostics;
+using System.Windows.Forms;
+using System.ComponentModel;
+
+
 //Selenium Namespaces
 using OpenQA.Selenium;
 using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.IE;
 
+//Namespaces for getting the executable paths of the running processes
+using System.IO;
+
 namespace Selenium_Demo_2
 {
+    
     class Program
     {
+        //Globals
+        static IWebDriver driver = new FirefoxDriver();
+
+        //Method used to check if element exists
+        static bool isElementPresent(By by)
+        {
+            try
+            {
+                driver.FindElement(by);
+                return true;
+            }
+            catch (NoSuchElementException e)
+            {
+                //MessageBox.Show(e.Message + "\n Could not find required element");
+                return false;
+            }
+        }
+
         static void Main(string[] args)
         {
             //Test Selenium to open up Firefox
@@ -36,11 +63,19 @@ namespace Selenium_Demo_2
 
             //TOOLS QA Test Eg
 
-            //Launch the Firefox Browser
-            IWebDriver driver = new FirefoxDriver();
-
             //Open a webpage
+            
+
+            //Java Script Executor to give the driver certain functions like opening another tab
+            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+
             driver.Url = "http://www.demoqa.com";
+
+            //Another Driver to test FB Automation
+            //IWebDriver driver2 = new FirefoxDriver();
+            //driver2.Url = "https://www.facebook.com/";
+
+            /****NB USING ANOTHER DRIVER WILL OPEN UP A NEW INSTANCE OF THE BROWSER INSTEAD OF ANOTHER TAB*********************/
 
             //Get the page title and page length
             string Title = driver.Title;
@@ -61,8 +96,176 @@ namespace Selenium_Demo_2
             //driver.Quit();
 
             //Inspect some HTML and click on an element
-            driver.FindElement(By.XPath(".//*[@id='tabs-1']/div/p/a")).Click();
+            //Try to click on the services link
+            try
+            {   //This method requires user knowing an HTML ID
+                //driver.FindElement(By.XPath(".//*[@id='menu-item-155']/a")).Click();
+
+                //This method involves trying to get to the element merely by name
+                //driver.FindElement(By.Name("Services")).Click();
+
+                //Best to access the link by using the LinkText criteria as we can't be sure what the internal HTML source is
+                driver.FindElement(By.LinkText("Services")).Click();
+
+            }
+            catch(Exception ex)
+            {
+                //MessageBox.Show(ex.Message + "\n No Such element exists in Page Source");
+                Console.WriteLine(ex.Message + "/n No Such element exists in Page Source");
+            }
+
+            //Now try and open up FB with the same driver
+            //However we want to open this link in NEW TAB
+            //The only way to open new tabs is to simulate the keyboard shortcuts
+            js.ExecuteScript("window.open()");
+            driver.SwitchTo().Window(driver.WindowHandles[driver.WindowHandles.Count - 1]);
+            driver.Navigate().GoToUrl("https://www.facebook.com/");
+
+            //driver.Url = "https://www.facebook.com/";
+
+            Console.WriteLine("Title: " + driver.Title + "Length: " + driver.Title.Length);
+            Console.WriteLine("Source Length: " + driver.PageSource.Length);
+
+            //At this point we should be in the default login page because we have not
+            //given Portal access to any cookies yet
+
+            //try and search for the login text boxes
+            //Elements in textboxes that we need can be referenced by id, class, or name
+            //So check if elements exist according to certain criteria
+
+            //NB ON CERTAIN SITES EMAILS are referrenced as Email instead of email
+            //Add in validation for this later on ==> make it case insensitive
+
+            if(isElementPresent(By.Name("email")))
+            {
+                //if email box exists by name fill it out
+                driver.FindElement(By.Name("email")).SendKeys("pmisthry@gmail.com");
+            }
+            else if(isElementPresent(By.Id("email")))
+            {
+                //if email box exists by id fill it out
+                driver.FindElement(By.Id("email")).SendKeys("pmisthry@gmail.com");
+            }
+            else if(isElementPresent(By.ClassName("email")))
+            {
+                //if email box exists by a class name fill it out
+                driver.FindElement(By.ClassName("email")).SendKeys("pmisthry@gmail.com");
+            }
+            else
+            {
+                //could not find the email box and prompt the user
+                MessageBox.Show("Could not find email field to automate");
+            }
+
+            //NOW USE THE SAME PATTERN TO CHECK FOR THE PASSWORD BOX
+            //NB ON CERTAIN SITES PASSWORDS ARE REFERRED TO AS password instead of pass
+            //Some may also use Password or Pass ==> make the check case insensitive
+            //Add in validation for this later on
+
+            if (isElementPresent(By.Name("pass")))
+            {
+                //if email box exists by name fill it out
+                driver.FindElement(By.Name("pass")).SendKeys("Solidsnakex2");
+            }
+            else if (isElementPresent(By.Id("pass")))
+            {
+                //if email box exists by id fill it out
+                driver.FindElement(By.Id("pass")).SendKeys("Solidsnakex2");
+            }
+            else if (isElementPresent(By.ClassName("pass")))
+            {
+                //if email box exists by a class name fill it out
+                driver.FindElement(By.ClassName("pass")).SendKeys("Solidsnakex2");
+            }
+            else
+            {
+                //could not find the email box and prompt the user
+                MessageBox.Show("Could not find email field to automate");
+            }
+
+            //Now check for the login button ==> usually referred to as "submit" within the current form
+
+            //The submit() method is used to submit a form. This is an alternative to clicking the form's submit button. 
+            //You can use submit() on any element within the form, not just on the submit button itself. 
+            //When submit() is used, WebDriver will look up the DOM to know which form the element belongs to, and then trigger its submit function.
+
+            //using submit method on the password element
+            if (isElementPresent(By.Name("pass")))
+            {
+                //if email box exists by name fill it out
+                driver.FindElement(By.Name("pass")).Submit();
+            }
+            else if (isElementPresent(By.Id("pass")))
+            {
+                //if email box exists by id fill it out
+                driver.FindElement(By.Id("pass")).Submit();
+            }
+            else if (isElementPresent(By.ClassName("pass")))
+            {
+                //if email box exists by a class name fill it out
+                driver.FindElement(By.ClassName("pass")).Submit();
+            }
+            else
+            {
+                //could not find the email box and prompt the user
+                MessageBox.Show("Could not find email field to automate");
+            }
+
+            //Try automating Wavescape on a new window
+            js.ExecuteScript("window.open()");
+            driver.SwitchTo().Window(driver.WindowHandles[driver.WindowHandles.Count - 1]);
+            driver.Navigate().GoToUrl("https://www.wavescape.co.za/");
+
+            //Press the Login / Register Link
+            //Do some checks first
+            
+            if (isElementPresent(By.Name("login")))
+            {
+                //if email box exists by name fill it out
+                driver.FindElement(By.Name("login")).Click();
+            }
+            else if (isElementPresent(By.Id("login")))
+            {
+                //if email box exists by id fill it out
+                driver.FindElement(By.Id("login")).Click();
+            }
+            else if (isElementPresent(By.ClassName("login")))
+            {
+                //if email box exists by a class name fill it out
+                driver.FindElement(By.ClassName("login")).Click();
+            }
+            else
+            {
+                //could not find the email box and prompt the user
+                MessageBox.Show("Could not find field to automate. Please use manual control");
+            }
+
+            //Now the javascript pop up box appears
+            //Enter Peter's Details
+            if (isElementPresent(By.Name("username")))
+            {
+                //if email box exists by name fill it out
+                driver.FindElement(By.Name("username")).SendKeys("pcampion");
+            }
+            else if (isElementPresent(By.Id("username")))
+            {
+                //if email box exists by id fill it out
+                driver.FindElement(By.Id("username")).SendKeys("pcampion");
+            }
+            else if (isElementPresent(By.ClassName("username")))
+            {
+                //if email box exists by a class name fill it out
+                driver.FindElement(By.ClassName("username")).SendKeys("pcampion");
+            }
+            else
+            {
+                //could not find the email box and prompt the user
+                MessageBox.Show("Could not find email field to automate");
+            }
+
 
         }
+
+
     }
 }
