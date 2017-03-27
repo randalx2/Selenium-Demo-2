@@ -15,6 +15,9 @@ using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.IE;
 
+//Special Support Classes for Selenium from Selenium.support package
+using OpenQA.Selenium.Support.UI;
+
 //Namespaces for getting the executable paths of the running processes
 using System.IO;
 
@@ -39,6 +42,37 @@ namespace Selenium_Demo_2
                 //MessageBox.Show(e.Message + "\n Could not find required element");
                 return false;
             }
+        }
+
+        //Method to check for alerts
+        /** static IAlert isAlertPresent()
+         {
+             try
+             {
+                 return driver.SwitchTo().Alert();
+                
+             }   // try 
+             catch (NoAlertPresentException ex)
+             {
+                 //We can IGNORE this exception as it means there is no alert present...yet!
+                 MessageBox.Show(ex.Message);
+                 return null;
+             }   // catch 
+
+             //Other exceptions will be ignored and wind up the stack
+         } **/
+
+        static bool IsAlertShown(IWebDriver driver)
+        {
+            try
+            {
+                driver.SwitchTo().Alert();
+            }
+            catch (NoAlertPresentException e)
+            {
+                return false;
+            }
+            return true;
         }
 
         static void Main(string[] args)
@@ -68,6 +102,9 @@ namespace Selenium_Demo_2
 
             //Java Script Executor to give the driver certain functions like opening another tab
             IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+
+            //Wait Object for the alert to pop up due to server issues
+            //WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
 
             driver.Url = "http://www.demoqa.com";
 
@@ -218,6 +255,8 @@ namespace Selenium_Demo_2
 
             //Press the Login / Register Link
             //Do some checks first
+
+
             
             if (isElementPresent(By.Name("login")))
             {
@@ -240,8 +279,16 @@ namespace Selenium_Demo_2
                 MessageBox.Show("Could not find field to automate. Please use manual control");
             }
 
-            //Now the javascript pop up box appears
-            //Enter Peter's Details
+            //Wait and check for alert window
+            var iwait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+            iwait.Until(drv => IsAlertShown(drv));
+            IAlert alert = driver.SwitchTo().Alert();
+            alert.Accept();
+
+
+
+            //After checking for alert window check for username
+
             if (isElementPresent(By.Name("username")))
             {
                 //if email box exists by name fill it out
