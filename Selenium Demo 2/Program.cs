@@ -373,8 +373,13 @@ namespace Selenium_Demo_2
                 MessageBox.Show("Could not find email field to automate");
             }
 
-            
-            
+            //Wait for login to complete
+            /*IWait<IWebDriver> wait = new OpenQA.Selenium.Support.UI.WebDriverWait(driver, TimeSpan.FromSeconds(30.00));
+
+            wait.Until(driver1 => ((IJavaScriptExecutor)driver).ExecuteScript("return document.readyState").Equals("complete"));
+           
+
+            driver.Navigate().GoToUrl("https://www.wavescape.co.za/tools/webcams/durban-beachfront.html");*/
 
         }
 
