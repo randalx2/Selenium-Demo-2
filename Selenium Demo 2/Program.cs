@@ -67,12 +67,14 @@ namespace Selenium_Demo_2
             try
             {
                 driver.SwitchTo().Alert();
+                return true;
             }
             catch (NoAlertPresentException e)
             {
+                MessageBox.Show(e.Message);
                 return false;
             }
-            return true;
+            //return true;
         }
 
         static void Main(string[] args)
@@ -281,12 +283,18 @@ namespace Selenium_Demo_2
 
             //Wait and check for alert window
             var iwait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-            iwait.Until(drv => IsAlertShown(drv));
-            IAlert alert = driver.SwitchTo().Alert();
-            alert.Accept();
 
-
-
+            try
+            {
+                iwait.Until(drv => IsAlertShown(drv));
+                IAlert alert = driver.SwitchTo().Alert();
+                alert.Accept();
+            }
+            catch(WebDriverTimeoutException ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            
             //After checking for alert window check for username
 
             if (isElementPresent(By.Name("username")))
