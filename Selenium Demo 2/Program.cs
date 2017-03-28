@@ -287,6 +287,7 @@ namespace Selenium_Demo_2
                 MessageBox.Show("Could not find field to automate. Please use manual control");
             }
 
+
             //Wait and check for alert window
             var iwait = new WebDriverWait(driver, TimeSpan.FromSeconds(3));
 
@@ -294,7 +295,7 @@ namespace Selenium_Demo_2
             {
                 iwait.Until(driver => IsAlertShown(driver));
                 IAlert alert = driver.SwitchTo().Alert();
-                alert.Accept();
+                //alert.Accept();
             }
             catch(WebDriverTimeoutException ex)
             {
@@ -372,11 +373,8 @@ namespace Selenium_Demo_2
                 MessageBox.Show("Could not find email field to automate");
             }
 
-            //Once we are logged in --> directly access the durban cams via the ur directly
-
-            //Switch control back to main form
             
-            driver.FindElement(By.LinkText("Cam")).Click();
+            
 
         }
 
