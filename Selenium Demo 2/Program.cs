@@ -67,12 +67,14 @@ namespace Selenium_Demo_2
             try
             {
                 driver.SwitchTo().Alert();
+                return true;
             }
             catch (NoAlertPresentException e)
             {
+                //MessageBox.Show(e.Message);
                 return false;
             }
-            return true;
+            //return true;
         }
 
         static void Main(string[] args)
@@ -154,7 +156,13 @@ namespace Selenium_Demo_2
             //Now try and open up FB with the same driver
             //However we want to open this link in NEW TAB
             //The only way to open new tabs is to simulate the keyboard shortcuts
-            js.ExecuteScript("window.open()");
+
+            /*********************************************************************************************************
+             * AUTOMATING FACEBOOK
+             * 
+             *******************************************************************************************************/
+
+            /*js.ExecuteScript("window.open()");
             driver.SwitchTo().Window(driver.WindowHandles[driver.WindowHandles.Count - 1]);
             driver.Navigate().GoToUrl("https://www.facebook.com/");
 
@@ -248,6 +256,8 @@ namespace Selenium_Demo_2
                 MessageBox.Show("Could not find email field to automate");
             }
 
+         */
+
             //Try automating Wavescape on a new window
             js.ExecuteScript("window.open()");
             driver.SwitchTo().Window(driver.WindowHandles[driver.WindowHandles.Count - 1]);
@@ -256,8 +266,6 @@ namespace Selenium_Demo_2
             //Press the Login / Register Link
             //Do some checks first
 
-
-            
             if (isElementPresent(By.Name("login")))
             {
                 //if email box exists by name fill it out
@@ -280,12 +288,20 @@ namespace Selenium_Demo_2
             }
 
             //Wait and check for alert window
-            var iwait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-            iwait.Until(drv => IsAlertShown(drv));
-            IAlert alert = driver.SwitchTo().Alert();
-            alert.Accept();
+            var iwait = new WebDriverWait(driver, TimeSpan.FromSeconds(3));
 
-
+            try
+            {
+                iwait.Until(driver => IsAlertShown(driver));
+                IAlert alert = driver.SwitchTo().Alert();
+                alert.Accept();
+            }
+            catch(WebDriverTimeoutException ex)
+            {
+                //Forcing program to ignore this exception
+                //MessageBox.Show(ex.Message);
+            }
+           
 
             //After checking for alert window check for username
 
@@ -310,6 +326,57 @@ namespace Selenium_Demo_2
                 MessageBox.Show("Could not find email field to automate");
             }
 
+            //Checking for password
+            if (isElementPresent(By.Name("password")))
+            {
+                //if email box exists by name fill it out
+                driver.FindElement(By.Name("password")).SendKeys("lusaka1");
+            }
+            else if (isElementPresent(By.Id("password")))
+            {
+                //if email box exists by id fill it out
+                driver.FindElement(By.Id("password")).SendKeys("lusaka1");
+            }
+            else if (isElementPresent(By.ClassName("password")))
+            {
+                //if email box exists by a class name fill it out
+                driver.FindElement(By.ClassName("password")).SendKeys("lusaka1");
+            }
+            else
+            {
+                //could not find the email box and prompt the user
+                MessageBox.Show("Could not find email field to automate");
+            }
+
+            //using submit method on the password element
+            //This should effectively log us in
+
+            if (isElementPresent(By.Name("password")))
+            {
+                //if email box exists by name fill it out
+                driver.FindElement(By.Name("password")).Submit();
+            }
+            else if (isElementPresent(By.Id("password")))
+            {
+                //if email box exists by id fill it out
+                driver.FindElement(By.Id("password")).Submit();
+            }
+            else if (isElementPresent(By.ClassName("password")))
+            {
+                //if email box exists by a class name fill it out
+                driver.FindElement(By.ClassName("password")).Submit();
+            }
+            else
+            {
+                //could not find the email box and prompt the user
+                MessageBox.Show("Could not find email field to automate");
+            }
+
+            //Once we are logged in --> directly access the durban cams via the ur directly
+
+            //Switch control back to main form
+            
+            driver.FindElement(By.LinkText("Cam")).Click();
 
         }
 
