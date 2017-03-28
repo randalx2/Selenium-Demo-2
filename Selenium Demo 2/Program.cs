@@ -18,6 +18,8 @@ using OpenQA.Selenium.IE;
 //Special Support Classes for Selenium from Selenium.support package
 using OpenQA.Selenium.Support.UI;
 
+//namespaces for alert handling
+
 //Namespaces for getting the executable paths of the running processes
 using System.IO;
 
@@ -28,7 +30,7 @@ namespace Selenium_Demo_2
     {
         //Globals
         static IWebDriver driver = new FirefoxDriver();
-
+        
         //Method used to check if element exists
         static bool isElementPresent(By by)
         {
@@ -44,23 +46,6 @@ namespace Selenium_Demo_2
             }
         }
 
-        //Method to check for alerts
-        /** static IAlert isAlertPresent()
-         {
-             try
-             {
-                 return driver.SwitchTo().Alert();
-                
-             }   // try 
-             catch (NoAlertPresentException ex)
-             {
-                 //We can IGNORE this exception as it means there is no alert present...yet!
-                 MessageBox.Show(ex.Message);
-                 return null;
-             }   // catch 
-
-             //Other exceptions will be ignored and wind up the stack
-         } **/
 
         static bool IsAlertShown(IWebDriver driver)
         {
@@ -74,12 +59,38 @@ namespace Selenium_Demo_2
                 //MessageBox.Show(e.Message);
                 return false;
             }
-            //return true;
         }
+
+      
+
+        static void WaitForPageLoad()
+                {
+                    IWebElement page = null;
+                    if (page != null)
+                    {
+                        var waitForCurrentPageToStale = new WebDriverWait(driver, TimeSpan.FromSeconds(60));
+                        waitForCurrentPageToStale.Until(ExpectedConditions.StalenessOf(page));
+                    }
+
+                    var waitForDocumentReady = new WebDriverWait(driver, TimeSpan.FromSeconds(60));
+                    waitForDocumentReady.Until((wdriver) => (driver as IJavaScriptExecutor).ExecuteScript("return document.readyState").Equals("complete"));
+
+                    page = driver.FindElement(By.TagName("html"));
+
+                }
 
         static void Main(string[] args)
         {
+            //Java Script Executor to give the driver certain functions like opening another tab
+            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+
+            //maximise the browser
+            driver.Manage().Window.Maximize();
+
             //Test Selenium to open up Firefox
+
+            //Open up google as first tab
+            driver.Url = "https://www.google.com/";
 
             //Use GeckoDriver to resolve problems with Firefox
             //NB To Work copy the geckodriver.exe to the same directory as the project executable
@@ -102,19 +113,14 @@ namespace Selenium_Demo_2
             //Open a webpage
             
 
-            //Java Script Executor to give the driver certain functions like opening another tab
-            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+            
 
             //Wait Object for the alert to pop up due to server issues
             //WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
 
-            driver.Url = "http://www.demoqa.com";
+            /*driver.Url = "http://www.demoqa.com";
 
-            //Another Driver to test FB Automation
-            //IWebDriver driver2 = new FirefoxDriver();
-            //driver2.Url = "https://www.facebook.com/";
-
-            /****NB USING ANOTHER DRIVER WILL OPEN UP A NEW INSTANCE OF THE BROWSER INSTEAD OF ANOTHER TAB*********************/
+            //NB USING ANOTHER DRIVER WILL OPEN UP A NEW INSTANCE OF THE BROWSER INSTEAD OF ANOTHER TAB
 
             //Get the page title and page length
             string Title = driver.Title;
@@ -152,6 +158,7 @@ namespace Selenium_Demo_2
                 //MessageBox.Show(ex.Message + "\n No Such element exists in Page Source");
                 Console.WriteLine(ex.Message + "/n No Such element exists in Page Source");
             }
+            */
 
             //Now try and open up FB with the same driver
             //However we want to open this link in NEW TAB
@@ -263,7 +270,13 @@ namespace Selenium_Demo_2
             driver.SwitchTo().Window(driver.WindowHandles[driver.WindowHandles.Count - 1]);
             driver.Navigate().GoToUrl("https://www.wavescape.co.za/");
 
-            //Press the Login / Register Link
+            
+
+            // Store the current window handle so you can switch back to the
+            // original window when you close the popup.
+            string current = driver.CurrentWindowHandle;  
+
+            //Press the Login / Register Link ==> initiates pop up ==> can also use pop-up-window-finder class
             //Do some checks first
 
             if (isElementPresent(By.Name("login")))
@@ -287,14 +300,19 @@ namespace Selenium_Demo_2
                 MessageBox.Show("Could not find field to automate. Please use manual control");
             }
 
+            //store the handle for the pop up window
+            string newHandle = driver.CurrentWindowHandle;
 
             //Wait and check for alert window
             var iwait = new WebDriverWait(driver, TimeSpan.FromSeconds(3));
 
             try
             {
-                iwait.Until(driver => IsAlertShown(driver));
-                IAlert alert = driver.SwitchTo().Alert();
+                //iwait.Until(driver => IsAlertShown(driver));
+                //IAlert alert = driver.SwitchTo().Alert();
+                IAlert alert = iwait.Until(ExpectedConditions.AlertIsPresent());
+                driver.SwitchTo().Alert();
+                
                 //alert.Accept();
             }
             catch(WebDriverTimeoutException ex)
@@ -373,13 +391,16 @@ namespace Selenium_Demo_2
                 MessageBox.Show("Could not find email field to automate");
             }
 
-            //Wait for login to complete
-            /*IWait<IWebDriver> wait = new OpenQA.Selenium.Support.UI.WebDriverWait(driver, TimeSpan.FromSeconds(30.00));
-
-            wait.Until(driver1 => ((IJavaScriptExecutor)driver).ExecuteScript("return document.readyState").Equals("complete"));
-           
-
-            driver.Navigate().GoToUrl("https://www.wavescape.co.za/tools/webcams/durban-beachfront.html");*/
+            try
+            {
+                iwait.Until(ExpectedConditions.UrlMatches("https://www.wavescape.co.za/subscriptiondetails/user.html"));
+                driver.Navigate().GoToUrl("https://www.wavescape.co.za/tools/webcams/durban-beachfront.html");
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message + " \n Unable to Verify Expected URL");
+            }
+            
 
         }
 
